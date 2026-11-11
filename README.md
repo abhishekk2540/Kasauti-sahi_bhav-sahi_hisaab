@@ -1,3 +1,4 @@
+# Kasauti-sahi_bhav-sahi_hisaab
 # Kasauti: jeweller toolkit (backend + frontend)
 
 `backend/` is a FastAPI API and `frontend/` is a Next.js (App Router, TypeScript, Tailwind) web app. Together they make a jeweller B2B tool: daily gold/silver rates, branded rate banner, customer price alerts,
