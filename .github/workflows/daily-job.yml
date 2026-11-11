@@ -1,0 +1,23 @@
+name: Daily rates + alerts
+on:
+  schedule:
+    - cron: "45 3 * * *"   # 09:15 IST
+  workflow_dispatch:
+jobs:
+  daily:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: backend } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip, cache-dependency-path: backend/requirements.txt }
+      - run: pip install -r requirements.txt
+      - run: python -m app.jobs daily
+        env:
+          APP_ENV: production
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          RATE_ADJUST_GOLD_PCT: ${{ vars.RATE_ADJUST_GOLD_PCT || '0' }}
+          RATE_ADJUST_SILVER_PCT: ${{ vars.RATE_ADJUST_SILVER_PCT || '0' }}

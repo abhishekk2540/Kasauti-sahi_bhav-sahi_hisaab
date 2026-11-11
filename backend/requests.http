@@ -1,0 +1,56 @@
+### Quick API walkthrough (VS Code "REST Client" extension: click "Send Request" above each block)
+@base = http://localhost:8000
+
+### 1. Sign up (copy access_token into @token below)
+POST {{base}}/auth/signup
+Content-Type: application/json
+
+{ "email": "me@example.com", "password": "password123", "shop_name": "Raj Jewellers", "phone": "9999900000" }
+
+### 2. Log in
+POST {{base}}/auth/login
+Content-Type: application/json
+
+{ "email": "me@example.com", "password": "password123" }
+
+@token = PASTE_TOKEN_HERE
+
+### 3. Fetch today's rates (uses RATE_PROVIDER)
+POST {{base}}/rates/refresh
+Authorization: Bearer {{token}}
+
+### 4. See rates
+GET {{base}}/rates/today
+Authorization: Bearer {{token}}
+
+### 5. Set your margin (2% + Rs 50/gram on gold)
+PUT {{base}}/margins/gold
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "margin_percent": 2, "making_per_gram": 50 }
+
+### 6. Banner (open the response image)
+GET {{base}}/banner.png
+Authorization: Bearer {{token}}
+
+### 7. Add customer
+POST {{base}}/customers
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "name": "Sunita Devi", "phone": "9876543210" }
+
+### 8. Alert rule: silver 3% below 30-day average, notify yourself
+POST {{base}}/alerts/rules
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "name": "Silver dip", "metal": "silver", "kind": "below_avg_pct", "window_days": 30, "threshold": 3, "audience": "self" }
+
+### 9. Ask the AI (needs ANTHROPIC_API_KEY)
+POST {{base}}/agent/chat
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "messages": [{ "role": "user", "content": "aaj gold ka rate kya hai?" }] }

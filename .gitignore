@@ -1,0 +1,5 @@
+__pycache__/
+*.db
+.env
+.pytest_cache/
+backend/evals/last_run.json

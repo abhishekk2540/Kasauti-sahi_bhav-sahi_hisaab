@@ -1,0 +1,15 @@
+services:
+  db:
+    image: postgres:16
+    environment: { POSTGRES_USER: kasauti, POSTGRES_PASSWORD: kasauti, POSTGRES_DB: kasauti }
+    ports: ["5432:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data]
+  api:
+    build: ./backend
+    env_file: ./backend/.env
+    environment:
+      DATABASE_URL: postgresql://kasauti:kasauti@db:5432/kasauti
+    ports: ["8000:8000"]
+    depends_on: [db]
+volumes:
+  pgdata:
