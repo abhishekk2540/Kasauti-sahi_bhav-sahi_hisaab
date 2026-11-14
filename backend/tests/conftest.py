@@ -55,14 +55,14 @@ def seed_history(db, days=60, override_today: dict | None = None):
 
 @pytest.fixture
 def auth(client):
-    r = client.post("/auth/signup", json={"email": "Raj@Example.com", "password": "password123",
-                                           "shop_name": "Raj Jewellers", "phone": "9999900000"})
+    r = client.post("/auth/signup", json={"email": "Raj@Example.com", "password": "Password1!",
+                                           "confirm_password": "Password1!", "name": "Raj Jewellers", "phone": "9999900000"})
     assert r.status_code == 201, r.text
     return {"Authorization": f"Bearer {r.json()['access_token']}"}
 
 
 @pytest.fixture
 def auth2(client):
-    r = client.post("/auth/signup", json={"email": "other@example.com", "password": "password123",
-                                           "shop_name": "Other Shop"})
+    r = client.post("/auth/signup", json={"email": "other@example.com", "password": "Password1!",
+                                           "confirm_password": "Password1!", "name": "Other Shop", "phone": "9000000001"})
     return {"Authorization": f"Bearer {r.json()['access_token']}"}

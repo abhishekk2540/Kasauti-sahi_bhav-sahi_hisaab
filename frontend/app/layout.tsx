@@ -1,4 +1,6 @@
 import type { Metadata, Viewport } from "next";
+import "@fontsource-variable/inter";
+import "@fontsource-variable/playfair-display";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth";
 

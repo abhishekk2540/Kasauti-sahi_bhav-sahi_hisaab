@@ -26,18 +26,18 @@ def signup(body: SignupIn, db: Session = Depends(get_db)):
     email = body.email.lower()
     if db.scalar(select(User.id).where(User.email == email)):
         raise HTTPException(409, "Email already registered")
-    u = User(email=email, phone=body.phone, shop_name=body.shop_name, password_hash=hash_password(body.password))
-    db.add(u)
+    user = User(email=email, phone=body.phone, shop_name=body.name, password_hash=hash_password(body.password))
+    db.add(user)
     db.commit()
-    return TokenOut(access_token=create_token(u.id))
+    return TokenOut(access_token=create_token(user.id))
 
 
 @router.post("/auth/login", response_model=TokenOut)
 def login(body: LoginIn, db: Session = Depends(get_db)):
-    u = db.scalar(select(User).where(User.email == body.email.lower()))
-    if not u or not verify_password(body.password, u.password_hash):
+    user = db.scalar(select(User).where(User.email == body.email.lower()))
+    if not user or not user.password_hash or not verify_password(body.password, user.password_hash):
         raise HTTPException(401, "Invalid email or password")
-    return TokenOut(access_token=create_token(u.id))
+    return TokenOut(access_token=create_token(user.id))
 
 
 @router.get("/me", response_model=UserOut)

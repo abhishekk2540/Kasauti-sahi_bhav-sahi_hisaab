@@ -65,3 +65,25 @@ def test_banner_indian_grouping():
 
     assert [inr_group(x) for x in (0, 999, 1000, 87933.1, 107400, 1234567, 12345678)] == [
         "0", "999", "1,000", "87,933", "1,07,400", "12,34,567", "1,23,45,678"]
+
+
+def test_banner_bundled_font_supports_rupee():
+    from app.services.banner import _font
+
+    font, ok = _font(40)
+    assert ok is True
+    assert font.getmask("\u20b9").getbbox() is not None
+
+
+def test_sentry_is_noop_without_dsn_and_safe_with_one(monkeypatch):
+    from app.observability import init_sentry
+
+    monkeypatch.delenv("SENTRY_DSN", raising=False)
+    assert init_sentry() is False
+    monkeypatch.setenv("SENTRY_DSN", "https://abc@o0.ingest.sentry.io/0")
+    assert init_sentry() is True  # init only, no network call
+    import sentry_sdk
+
+    assert sentry_sdk.get_client().options["send_default_pii"] is False
+    assert sentry_sdk.get_client().options["max_request_body_size"] == "never"
+    sentry_sdk.get_client().close()

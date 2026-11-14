@@ -38,7 +38,7 @@ Edit `backend/.env`. The app reads this file automatically; you never export var
 | Variable | What to put | Needed? |
 |---|---|---|
 | `RATE_PROVIDER` | `mock` = fake prices, works offline (use this first). `goldapi` = real prices from the internet | yes |
-| `DATABASE_URL` | Leave as is for local SQLite (a `kasauti.db` file appears). For Postgres: paste your Neon/Supabase URL | no |
+| `DATABASE_URL` | Neon pooled PostgreSQL URL, including `?sslmode=require`; SQLite remains available for local-only development | no |
 | `JWT_SECRET` | Any long random text. Generate: `python -c "import secrets;print(secrets.token_urlsafe(32))"` | yes in production |
 | `CORS_ORIGINS` | Frontend address, e.g. `http://localhost:3000` (comma-separate several) | when frontend exists |
 | `RATE_ADJUST_GOLD_PCT` / `_SILVER_PCT` | Calibrate to Indian retail rate, e.g. `6`. Compare with a local jeweller's quote | when using `goldapi` |
@@ -53,7 +53,18 @@ Edit `backend/.env`. The app reads this file automatically; you never export var
 
 Minimum to start: `RATE_PROVIDER=mock`. Without a Telegram token, alerts are only logged to the terminal, not sent.
 
-## 4. Run the API
+## 4. Configure local authentication
+Kasauti uses its backend for email/password signup and login. Signup requires a name, phone
+number, email, password, and matching confirmation. Passwords must be at least seven characters
+and include uppercase, lowercase, a number, and a special character.
+```dotenv
+# backend/.env
+JWT_SECRET=replace-with-a-long-random-value
+```
+After signup or login, the frontend stores the short-lived API token locally and opens the
+dashboard. Never commit `.env` files.
+
+## 5. Run the API
 **Easiest in VS Code:** press `F5` (or Run and Debug panel) and pick **API (uvicorn, reload)**. Breakpoints work.
 
 **Or from the terminal** (inside `backend/`, venv active):
@@ -62,20 +73,20 @@ uvicorn app.main:app --reload
 ```
 Open http://localhost:8000/docs for the interactive API page, and http://localhost:8000/health should say `{"status":"ok"}`.
 
-## 5. Try it
+## 6. Try it
 - Open `backend/requests.http` and install the **REST Client** extension; click *Send Request* on each block in order
   (sign up > copy token into `@token` > refresh rates > rates > banner ...). Or do the same in `/docs` using the
   **Authorize** button.
 - Run the daily job (fetch rates, check alerts, draft reminders): `F5` > **Daily job**, or `python -m app.jobs daily`.
 - Mock prices only start today, so averages/alerts need a few days of data. To test alerts now, run the tests (they seed history).
 
-## 6. Run tests
+## 7. Run tests
 Click the beaker icon in VS Code's sidebar (pytest is pre-configured), or:
 ```bash
 python -m pytest -q
 ```
 
-## 7. Real prices, Telegram, AI (when ready)
+## 8. Real prices, Telegram, AI (when ready)
 1. **Real prices:** set `RATE_PROVIDER=goldapi`, restart, call `POST /rates/refresh`. If it returns `ok: false`, read `error`.
 2. **Telegram:** create bot with @BotFather, fill the three `TELEGRAM_*` values. Telegram must reach your server, so for local testing use a tunnel (e.g. `ngrok http 8000`), then register it once:
    ```bash
@@ -84,13 +95,22 @@ python -m pytest -q
    Then `GET /me` returns `telegram_link`: open it and press Start. Customers get their own link from `GET /customers`.
 3. **AI (Groq):** in `backend/.env` set `GROQ_API_KEY=gsk_...` (nothing else needed; the model defaults to `openai/gpt-oss-20b`), restart, call `POST /agent/chat` (responses stream as Server-Sent Events). Scheme reminder drafts also use it. Run `F5` > **Agent evals** to measure accuracy and put the % in the README. Never commit `.env` or paste the key into chat; `.gitignore` already excludes it.
 
-## 8. Postgres instead of SQLite (optional)
-```bash
-docker compose up -d db        # from the kasauti folder
-```
-Set in `backend/.env`: `DATABASE_URL=postgresql://kasauti:kasauti@localhost:5432/kasauti`, restart the API.
+## 9. Neon PostgreSQL instead of SQLite (optional)
+1. In the Neon dashboard, open your project and copy the **pooled** connection string.
+   It normally contains `-pooler` in the hostname and ends with `?sslmode=require`.
+2. In `backend/.env`, replace only the `DATABASE_URL` value. Do not commit this file:
+   ```dotenv
+   DATABASE_URL=postgresql://<user>:<password>@<host>/<database>?sslmode=require
+   ```
+3. Restart the API. On startup, `init_db()` creates the SQLAlchemy tables in Neon.
+4. Verify the connection:
+   ```bash
+   python -c "from sqlalchemy import text; from app.db import engine; print(engine.connect().execute(text('SELECT 1')).scalar())"
+   ```
+   The command must print `1`. If Neon reports a certificate or connection error, re-copy the
+   pooled URL and keep `sslmode=require`.
 
-## 9. Run the frontend (Next.js)
+## 10. Run the frontend (Next.js)
 Needs **Node.js 20+** (`node -v`). Keep the backend from step 4 running.
 ```bash
 cd frontend
@@ -116,6 +136,8 @@ Make sure the backend `CORS_ORIGINS` includes the frontend address (default `htt
 - **`ModuleNotFoundError: app`**: you are not inside `backend/`. `cd backend`, or use the F5 configs (they set it).
 - **`ModuleNotFoundError: fastapi`**: wrong interpreter. Select `backend/.venv` (step 2) and reopen the terminal.
 - **401 Not authenticated**: send `Authorization: Bearer <token>`; tokens expire after 72 h, log in again.
+- **Login keeps returning to the sign-in page**: clear the `kasauti_token` local-storage item,
+  restart the backend and frontend, then log in again.
 - **Banner shows "Rs." instead of the rupee sign** (Linux only): `sudo apt install fonts-dejavu-core`.
 - **`409 No rates available yet`**: call `POST /rates/refresh` first.
 - **Changed `.env` but nothing changed**: restart the server (`--reload` watches code, not `.env`).

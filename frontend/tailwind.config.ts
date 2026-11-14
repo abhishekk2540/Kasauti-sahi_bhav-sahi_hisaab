@@ -9,7 +9,10 @@ const config: Config = {
         gold: { 50: "#fdf8ec", 100: "#f8ecc9", 300: "#ecc86f", 400: "#e3b54a", 500: "#c99a2e", 600: "#a47a1f" },
         ink: "#1c1917",
       },
-      fontFamily: { sans: ["ui-sans-serif", "system-ui", "-apple-system", "Segoe UI", "Roboto", "Noto Sans Devanagari", "Mangal", "sans-serif"], display: ["Georgia", "Cambria", "Noto Serif Devanagari", "serif"] },
+      fontFamily: {
+        sans: ['"Inter Variable"', "ui-sans-serif", "system-ui", "Noto Sans Devanagari", "Mangal", "sans-serif"],
+        display: ['"Playfair Display Variable"', "Georgia", "Noto Serif Devanagari", "serif"],
+      },
     },
   },
   plugins: [],

@@ -27,7 +27,7 @@ from app.services.providers import MockProvider  # noqa: E402
 
 
 def seed(db):
-    u = User(email="eval@x.com", password_hash=hash_password("x" * 10), shop_name="Eval Jewellers", phone="9000000000")
+    u = User(email="eval@x.com", password_hash=hash_password("Password1!"), shop_name="Eval Jewellers", phone="9000000000")
     db.add(u)
     db.commit()
     t = today_ist()

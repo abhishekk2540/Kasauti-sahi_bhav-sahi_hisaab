@@ -24,9 +24,9 @@ def verify_password(password: str, stored: str) -> bool:
 
 
 def create_token(user_id: int) -> str:
-    s = get_settings()
-    exp = datetime.now(timezone.utc) + timedelta(hours=s.jwt_expire_hours)
-    return jwt.encode({"sub": str(user_id), "exp": exp}, s.jwt_secret, algorithm="HS256")
+    settings = get_settings()
+    expires = datetime.now(timezone.utc) + timedelta(hours=settings.jwt_expire_hours)
+    return jwt.encode({"sub": str(user_id), "exp": expires}, settings.jwt_secret, algorithm="HS256")
 
 
 def decode_token(token: str) -> int | None:

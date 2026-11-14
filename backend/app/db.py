@@ -1,6 +1,6 @@
 from datetime import date, datetime, timedelta, timezone
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, inspect, text
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 from .config import get_settings
@@ -39,3 +39,8 @@ def init_db() -> None:
     from . import models  # noqa: F401  (register tables)
 
     Base.metadata.create_all(engine)
+    columns = {column["name"] for column in inspect(engine).get_columns("users")}
+    if "clerk_user_id" in columns:
+        with engine.begin() as connection:
+            connection.execute(text("DROP INDEX IF EXISTS ix_users_clerk_user_id"))
+            connection.execute(text("ALTER TABLE users DROP COLUMN clerk_user_id"))

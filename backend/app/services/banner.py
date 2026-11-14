@@ -1,13 +1,16 @@
 """Daily rate banner (PNG) with shop branding (US-03). Needs a TTF font (fonts-dejavu-core in Docker)."""
 import io
 from datetime import date
+from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
 
 from ..config import DISCLAIMER
 
 W = H = 1080
+_BUNDLED = str(Path(__file__).resolve().parent.parent / "assets" / "fonts" / "DejaVuSans-Bold.ttf")
 _FONT_PATHS = [
+    _BUNDLED,
     "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
     "/usr/share/fonts/dejavu/DejaVuSans-Bold.ttf",
     "/usr/share/fonts/TTF/DejaVuSans-Bold.ttf",

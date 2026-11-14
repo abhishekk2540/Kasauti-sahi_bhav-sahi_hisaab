@@ -28,12 +28,20 @@ class FakeNotifier:
 
 # ---------- auth / profile (US-01)
 def test_signup_login_me(client, auth):
-    assert client.post("/auth/signup", json={"email": "raj@example.com", "password": "password123",
-                                              "shop_name": "x"}).status_code == 409  # case-insensitive dup
-    assert client.post("/auth/login", json={"email": "raj@example.com", "password": "wrongpass1"}).status_code == 401
-    tok = client.post("/auth/login", json={"email": "RAJ@example.com", "password": "password123"}).json()
+    assert client.post("/auth/signup", json={"email": "raj@example.com", "password": "Password1!",
+                                              "confirm_password": "Password1!", "name": "x", "phone": "9000000002"}).status_code == 409
+    assert client.post("/auth/login", json={"email": "raj@example.com", "password": "Wrongpass1!"}).status_code == 401
+    tok = client.post("/auth/login", json={"email": "RAJ@example.com", "password": "Password1!"}).json()
     me = client.get("/me", headers={"Authorization": f"Bearer {tok['access_token']}"}).json()
     assert me["shop_name"] == "Raj Jewellers" and me["has_logo"] is False
+
+
+def test_signup_password_validation(client):
+    base = {"email": "new@example.com", "name": "New Shop", "phone": "9000000003"}
+    weak = {**base, "password": "abc1234", "confirm_password": "abc1234"}
+    mismatch = {**base, "password": "Password1!", "confirm_password": "Password2!"}
+    assert client.post("/auth/signup", json=weak).status_code == 422
+    assert client.post("/auth/signup", json=mismatch).status_code == 422
 
 
 def test_requires_auth(client):
@@ -103,6 +111,10 @@ def test_customer_crud_search_isolation(client, auth, auth2):
     assert client.delete(f"/customers/{c['id']}", headers=auth).status_code == 204
 
 
+def test_customer_rejects_invalid_phone(client, auth):
+    assert client.post("/customers", json={"name": "Invalid", "phone": "kumar"}, headers=auth).status_code == 422
+
+
 # ---------- alerts (US-06/07/08)
 def _dip_today(db, pct):
     """History at a flat 9000 gold, then today is `pct`% lower."""
@@ -116,9 +128,9 @@ def test_rule_fires_once_cooldown_and_customer_optout(client, auth, db):
     _dip_today(db, 5)
     me = db.scalar(select(User))
     me.telegram_chat_id = "owner1"
-    c1 = client.post("/customers", json={"name": "A", "phone": "11111"}, headers=auth).json()
-    c2 = client.post("/customers", json={"name": "B", "phone": "22222"}, headers=auth).json()
-    c3 = client.post("/customers", json={"name": "C", "phone": "33333"}, headers=auth).json()
+    c1 = client.post("/customers", json={"name": "A", "phone": "1111111"}, headers=auth).json()
+    c2 = client.post("/customers", json={"name": "B", "phone": "2222222"}, headers=auth).json()
+    c3 = client.post("/customers", json={"name": "C", "phone": "3333333"}, headers=auth).json()
     for cid, chat in ((c1["id"], "ca"), (c2["id"], "cb"), (c3["id"], "cc")):
         db.get(Customer, cid).telegram_chat_id = chat
     db.get(Customer, c2["id"]).opted_out = True
@@ -173,7 +185,7 @@ def test_rule_validation(client, auth):
 
 # ---------- telegram linking
 def test_telegram_link_and_stop(client, auth, db):
-    cid = client.post("/customers", json={"name": "A", "phone": "11111"}, headers=auth).json()["id"]
+    cid = client.post("/customers", json={"name": "A", "phone": "1111111"}, headers=auth).json()["id"]
     n = FakeNotifier()
     cust = db.get(Customer, cid)
     assert handle_update(db, {"message": {"chat": {"id": 55}, "text": f"/start c_{cust.link_token}"}}, n) == "linked_customer"
@@ -189,7 +201,7 @@ def test_telegram_link_and_stop(client, auth, db):
 
 # ---------- schemes (US-09/10)
 def _enrolled(client, auth, db, start=None):
-    cid = client.post("/customers", json={"name": "Sunita", "phone": "11111"}, headers=auth).json()["id"]
+    cid = client.post("/customers", json={"name": "Sunita", "phone": "1111111"}, headers=auth).json()["id"]
     sid = client.post("/schemes", json={"name": "Gold Saver", "monthly_amount": 2000}, headers=auth).json()["id"]
     body = {"customer_id": cid}
     if start:

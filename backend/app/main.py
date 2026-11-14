@@ -6,9 +6,11 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .config import get_settings
 from .db import init_db
+from .observability import init_sentry
 from .routers import agent, alerts, auth, customers, dashboard, rates, schemes, telegram
 
 logging.basicConfig(level=logging.INFO)
+init_sentry()
 
 
 @asynccontextmanager

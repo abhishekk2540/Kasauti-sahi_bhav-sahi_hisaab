@@ -86,7 +86,7 @@ function CustomerModal({ editing, onClose, onSaved }: { editing: Customer | "new
     <Modal open={!!editing} onClose={onClose} title={editing === "new" ? "Add customer" : "Edit customer"}>
       <form onSubmit={submit} className="space-y-3">
         <Field label="Name"><input className="input" required maxLength={120} value={name} onChange={(e) => setName(e.target.value)} autoFocus /></Field>
-        <Field label="Phone"><input className="input" required minLength={5} maxLength={20} inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} /></Field>
+        <Field label="Phone"><input className="input" required pattern="[0-9+\- ]{7,20}" title="7-20 digits, may start with +" maxLength={20} inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} /></Field>
         {a.error && <ErrorBox message={a.error} />}
         <div className="flex justify-end gap-2"><button type="button" className="btn-ghost" onClick={onClose}>Cancel</button><button className="btn-primary" disabled={a.busy}>{a.busy ? "Saving..." : "Save"}</button></div>
       </form>

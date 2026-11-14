@@ -3,3 +3,7 @@ __pycache__/
 .env
 .pytest_cache/
 backend/evals/last_run.json
+.neon
+node_modules/
+backend/.venv/
+.env.local

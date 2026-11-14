@@ -13,8 +13,8 @@ def current_user(
     creds: HTTPAuthorizationCredentials | None = Depends(_bearer),
     db: Session = Depends(get_db),
 ) -> User:
-    uid = decode_token(creds.credentials) if creds else None
-    user = db.get(User, uid) if uid else None
+    user_id = decode_token(creds.credentials) if creds else None
+    user = db.get(User, user_id) if user_id else None
     if not user:
         raise HTTPException(401, "Not authenticated")
     return user

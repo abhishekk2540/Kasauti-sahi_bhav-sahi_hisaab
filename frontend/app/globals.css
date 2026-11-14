@@ -4,17 +4,28 @@
 
 :root { color-scheme: light; }
 body { @apply bg-[#faf7f2] font-sans text-ink antialiased; }
+.num { font-variant-numeric: tabular-nums; }
 
 @layer components {
-  .card { @apply rounded-2xl border border-stone-200 bg-white p-5 shadow-sm; }
-  .btn { @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-50; }
+  .card { @apply rounded-2xl border border-stone-200 bg-white p-6 shadow-sm; }
+  .btn { @apply inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-50; }
   .btn-primary { @apply btn bg-maroon-600 text-white hover:bg-maroon-700; }
   .btn-gold { @apply btn bg-gold-400 text-maroon-900 hover:bg-gold-300; }
   .btn-ghost { @apply btn border border-stone-300 bg-white text-stone-700 hover:bg-stone-50; }
   .btn-danger { @apply btn border border-red-200 bg-white text-red-700 hover:bg-red-50; }
-  .input { @apply w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:border-maroon-500 focus:ring-2 focus:ring-maroon-100; }
-  .label { @apply mb-1 block text-xs font-medium uppercase tracking-wide text-stone-500; }
+  .input { @apply min-h-[44px] w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:border-maroon-500 focus:ring-2 focus:ring-maroon-100; }
+  .label { @apply mb-1 block text-xs font-semibold uppercase tracking-wide text-stone-600; }
   .badge { @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium; }
-  .th { @apply px-3 py-2 text-left text-xs font-medium uppercase tracking-wide text-stone-500; }
+  .th { @apply px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-stone-600; }
   .td { @apply px-3 py-2.5 text-sm; }
+  .shimmer { @apply relative overflow-hidden bg-stone-200/80; }
+  .shimmer::after { content: ""; @apply absolute inset-0 -translate-x-full; background: linear-gradient(90deg, transparent, rgba(255,255,255,.7), transparent); animation: shimmer 1.6s ease-in-out infinite; }
+}
+
+@keyframes shimmer {
+  100% { transform: translateX(100%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shimmer::after { animation: none; }
 }

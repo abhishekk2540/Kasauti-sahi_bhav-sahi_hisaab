@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Disclaimer, ErrorBox, Field, PageHeader, Spinner } from "@/components/ui";
+import { Disclaimer, ErrorBox, Field, Modal, PageHeader, Spinner } from "@/components/ui";
 import { api } from "@/lib/api";
 import { inr } from "@/lib/format";
 import { useAction } from "@/lib/hooks";
@@ -9,25 +9,34 @@ import type { Backtest, StrategyResult } from "@/lib/types";
 export default function BacktestPage() {
   const [f, setF] = useState({ metal: "gold", daily_amount: "100", dip_pct: "3", window: "30", gst_pct: "3", spread_pct: "2" });
   const [res, setRes] = useState<Backtest | null>(null);
+  const [configure, setConfigure] = useState(false);
   const a = useAction();
   const run = (e: React.FormEvent) => {
     e.preventDefault();
-    a.run(async () => setRes(await api<Backtest>(`/backtest?${new URLSearchParams(f).toString()}`)));
+    a.run(async () => { setRes(await api<Backtest>(`/backtest?${new URLSearchParams(f).toString()}`)); setConfigure(false); });
   };
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setF({ ...f, [k]: e.target.value });
 
   return (
     <>
-      <PageHeader title="Backtest" subtitle="Does buying only on dips beat buying a fixed amount every day? Tested on your stored price history, including GST and dealer spread." />
-      <form onSubmit={run} className="card grid gap-3 sm:grid-cols-3">
-        <Field label="Metal"><select className="input" value={f.metal} onChange={set("metal")}><option value="gold">Gold</option><option value="silver">Silver</option></select></Field>
-        <Field label="Daily amount (₹)"><input className="input" type="number" min={1} value={f.daily_amount} onChange={set("daily_amount")} /></Field>
-        <Field label="Dip trigger (%)" hint="Buy when price is this far below average"><input className="input" type="number" step="0.1" min={0.1} max={49} value={f.dip_pct} onChange={set("dip_pct")} /></Field>
-        <Field label="Average window (days)"><input className="input" type="number" min={7} max={90} value={f.window} onChange={set("window")} /></Field>
-        <Field label="GST (%)"><input className="input" type="number" step="0.1" min={0} max={28} value={f.gst_pct} onChange={set("gst_pct")} /></Field>
-        <Field label="Dealer spread (%)"><input className="input" type="number" step="0.1" min={0} max={20} value={f.spread_pct} onChange={set("spread_pct")} /></Field>
-        <div className="sm:col-span-3"><button className="btn-primary" disabled={a.busy}>{a.busy ? "Running..." : "Run backtest"}</button></div>
-      </form>
+      <PageHeader title="Backtest" subtitle="Does buying only on dips beat buying a fixed amount every day? Tested on your stored price history, including GST and dealer spread."
+        actions={<button className="btn-primary" onClick={() => setConfigure(true)}>Configure backtest</button>} />
+      <div className="card flex flex-wrap items-center justify-between gap-3">
+        <div><div className="font-display text-lg font-semibold text-maroon-800">Compare your buying strategies</div><p className="mt-1 text-sm text-stone-600">{res ? `${res.assumptions.days} days of ${res.metal} history analyzed.` : "Choose your assumptions, then run a comparison."}</p></div>
+        <button className="btn-ghost" onClick={() => setConfigure(true)}>Edit assumptions</button>
+      </div>
+      <Modal open={configure} onClose={() => setConfigure(false)} title="Configure backtest">
+        <form onSubmit={run} className="grid gap-3 sm:grid-cols-2">
+          <Field label="Metal"><select className="input" value={f.metal} onChange={set("metal")}><option value="gold">Gold</option><option value="silver">Silver</option></select></Field>
+          <Field label="Daily amount (₹)"><input className="input" type="number" min={1} value={f.daily_amount} onChange={set("daily_amount")} /></Field>
+          <Field label="Dip trigger (%)" hint="Buy when price is this far below average"><input className="input" type="number" step="0.1" min={0.1} max={49} value={f.dip_pct} onChange={set("dip_pct")} /></Field>
+          <Field label="Average window (days)"><input className="input" type="number" min={7} max={90} value={f.window} onChange={set("window")} /></Field>
+          <Field label="GST (%)"><input className="input" type="number" step="0.1" min={0} max={28} value={f.gst_pct} onChange={set("gst_pct")} /></Field>
+          <Field label="Dealer spread (%)"><input className="input" type="number" step="0.1" min={0} max={20} value={f.spread_pct} onChange={set("spread_pct")} /></Field>
+          {a.error && <div className="sm:col-span-2"><ErrorBox message={a.error} /></div>}
+          <div className="flex justify-end gap-2 sm:col-span-2"><button type="button" className="btn-ghost" onClick={() => setConfigure(false)}>Cancel</button><button className="btn-primary" disabled={a.busy}>{a.busy ? "Running..." : "Run backtest"}</button></div>
+        </form>
+      </Modal>
       {a.error && <div className="mt-4"><ErrorBox message={a.error} /></div>}
       {a.busy && !res && <Spinner />}
       {res && (

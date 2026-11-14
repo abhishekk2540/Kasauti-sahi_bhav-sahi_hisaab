@@ -50,7 +50,7 @@ export function Banner({ refreshKey }: { refreshKey: number }) {
       {/* eslint-disable-next-line @next/next/no-img-element */}
       {url && <img src={url} alt="Today's rate banner" className="mx-auto w-full max-w-sm rounded-xl border border-stone-200 shadow" />}
       <div className="mt-3 flex flex-wrap justify-center gap-2">
-        {canShare && <button className="btn-primary" onClick={share}><Share2 className="h-4 w-4" /> Share (WhatsApp etc.)</button>}
+        {canShare && <button className="btn-primary" onClick={share}><Share2 className="h-4 w-4" /> Share on WhatsApp</button>}
         {url && <a className={canShare ? "btn-ghost" : "btn-primary"} href={url} download={fileName}><Download className="h-4 w-4" /> Download</a>}
       </div>
       {!canShare && <p className="mt-2 text-center text-xs text-stone-400">On a phone, a Share button appears so you can send it to WhatsApp in one tap.</p>}

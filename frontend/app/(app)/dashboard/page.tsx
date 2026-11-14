@@ -6,24 +6,26 @@ import { RateCard } from "@/components/RateCard";
 import { Disclaimer, Empty, ErrorBox, PageHeader, Seg, Spinner, Stat, StatusBadge } from "@/components/ui";
 import { dateTime, inr } from "@/lib/format";
 import { useApi } from "@/lib/hooks";
-import type { Dashboard, Metal } from "@/lib/types";
+import type { Dashboard, Margin, Metal } from "@/lib/types";
 
 export default function DashboardPage() {
   const [days, setDays] = useState(30);
   const [metal, setMetal] = useState<Metal>("gold");
   const { data, error, loading, reload } = useApi<Dashboard>(`/dashboard?days=${days}`);
+  const margins = useApi<Margin[]>("/margins");
 
   if (error) return <ErrorBox message={error} onRetry={reload} />;
   if (!data) return <Spinner />;
   const c = data.counts;
-  const series = data.charts[metal].map((p) => ({ date: p.date, value: p.selling_per_gram }));
+  const multiplier = metal === "gold" ? 10 : 1000;
+  const series = data.charts[metal].map((p) => ({ date: p.date, value: p.selling_per_gram * multiplier }));
 
   return (
     <>
       <PageHeader title="Dashboard" subtitle="Your business at a glance" />
       <div className="grid gap-4 sm:grid-cols-2">
-        <RateCard metal="gold" snap={data.rates.gold} />
-        <RateCard metal="silver" snap={data.rates.silver} />
+        <RateCard metal="gold" snap={data.rates.gold} margin={margins.data?.find((m) => m.metal === "gold")} series={data.charts.gold.map((p) => p.selling_per_gram * 10)} />
+        <RateCard metal="silver" snap={data.rates.silver} margin={margins.data?.find((m) => m.metal === "silver")} series={data.charts.silver.map((p) => p.selling_per_gram * 1000)} />
       </div>
 
       <div className="mt-4 grid grid-cols-2 gap-4 md:grid-cols-4">
@@ -41,7 +43,7 @@ export default function DashboardPage() {
             <Seg value={days} onChange={setDays} options={[[7, "7d"], [30, "30d"], [90, "90d"]]} />
           </div>
         </div>
-        {loading ? <Spinner /> : <PriceChart data={series} color={metal === "gold" ? "#c99a2e" : "#78716c"} />}
+        {loading ? <Spinner /> : <PriceChart data={series} metal={metal} />}
       </div>
 
       <div className="card mt-4">

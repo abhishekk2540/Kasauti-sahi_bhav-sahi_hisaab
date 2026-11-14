@@ -25,6 +25,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       setMe(await api<Me>("/me"));
     } catch {
+      tokenStore.clear();
       setMe(null);
     } finally {
       setLoading(false);
@@ -32,7 +33,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    refresh();
+    void refresh();
   }, [refresh]);
 
   const login = async (token: string) => {
@@ -40,6 +41,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setLoading(true);
     await refresh();
   };
+
   const logout = () => {
     tokenStore.clear();
     setMe(null);

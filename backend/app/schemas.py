@@ -1,9 +1,12 @@
 from datetime import date, datetime
 from typing import Literal
+import re
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator, model_validator
 
 Metal = Literal["gold", "silver"]
+PASSWORD_PATTERN = re.compile(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{7,128}$")
+PHONE_PATTERN = r"^[0-9+\-\s]{7,20}$"
 
 
 class ORM(BaseModel):
@@ -13,9 +16,23 @@ class ORM(BaseModel):
 # ---- auth / profile
 class SignupIn(BaseModel):
     email: EmailStr
-    password: str = Field(min_length=8, max_length=128)
-    shop_name: str = Field(min_length=1, max_length=120)
-    phone: str | None = Field(default=None, max_length=20)
+    name: str = Field(min_length=1, max_length=120)
+    password: str = Field(min_length=7, max_length=128)
+    confirm_password: str = Field(min_length=7, max_length=128)
+    phone: str = Field(pattern=PHONE_PATTERN)
+
+    @field_validator("password")
+    @classmethod
+    def validate_password(cls, value: str) -> str:
+        if not PASSWORD_PATTERN.fullmatch(value):
+            raise ValueError("Password needs uppercase, lowercase, a number, and a special character")
+        return value
+
+    @model_validator(mode="after")
+    def passwords_match(self):
+        if self.password != self.confirm_password:
+            raise ValueError("Passwords do not match")
+        return self
 
 
 class LoginIn(BaseModel):
@@ -40,7 +57,7 @@ class UserOut(ORM):
 
 class ProfileUpdate(BaseModel):
     shop_name: str | None = Field(default=None, min_length=1, max_length=120)
-    phone: str | None = Field(default=None, max_length=20)
+    phone: str | None = Field(default=None, pattern=PHONE_PATTERN)
 
 
 # ---- rates
@@ -67,12 +84,12 @@ class MarginChangeOut(ORM):
 # ---- customers
 class CustomerIn(BaseModel):
     name: str = Field(min_length=1, max_length=120)
-    phone: str = Field(min_length=5, max_length=20)
+    phone: str = Field(pattern=PHONE_PATTERN)
 
 
 class CustomerUpdate(BaseModel):
     name: str | None = Field(default=None, min_length=1, max_length=120)
-    phone: str | None = Field(default=None, min_length=5, max_length=20)
+    phone: str | None = Field(default=None, pattern=PHONE_PATTERN)
     opted_out: bool | None = None
 
 

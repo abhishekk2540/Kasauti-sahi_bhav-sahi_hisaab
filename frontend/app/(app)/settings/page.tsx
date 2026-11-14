@@ -1,7 +1,7 @@
 "use client";
-import { Copy, Upload } from "lucide-react";
+import { Copy, Pencil, Upload } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { ErrorBox, Field, PageHeader } from "@/components/ui";
+import { ErrorBox, Field, Modal, PageHeader } from "@/components/ui";
 import { api, fetchBlob } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { useAction } from "@/lib/hooks";
@@ -11,6 +11,7 @@ export default function SettingsPage() {
   const [shop, setShop] = useState(me?.shop_name ?? "");
   const [phone, setPhone] = useState(me?.phone ?? "");
   const [saved, setSaved] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const file = useRef<HTMLInputElement>(null);
   const prof = useAction();
@@ -28,7 +29,7 @@ export default function SettingsPage() {
 
   const saveProfile = (e: React.FormEvent) => {
     e.preventDefault();
-    prof.run(async () => { await api("/me", { method: "PATCH", body: { shop_name: shop, phone: phone || null } }); await refresh(); setSaved(true); setTimeout(() => setSaved(false), 2500); });
+    prof.run(async () => { await api("/me", { method: "PATCH", body: { shop_name: shop, phone: phone || null } }); await refresh(); setProfileOpen(false); setSaved(true); setTimeout(() => setSaved(false), 2500); });
   };
   const upload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
@@ -40,16 +41,17 @@ export default function SettingsPage() {
 
   return (
     <>
-      <PageHeader title="Settings" subtitle="Your shop details appear on the daily banner and customer messages" />
+      <PageHeader title="Settings" subtitle="Your shop details appear on the daily banner and customer messages"
+        actions={<button className="btn-primary" onClick={() => setProfileOpen(true)}><Pencil className="h-4 w-4" /> Edit profile</button>} />
       <div className="grid gap-4 lg:grid-cols-2">
-        <form onSubmit={saveProfile} className="card space-y-3">
+        <div className="card">
           <h2 className="font-display text-lg font-semibold text-maroon-800">Shop profile</h2>
-          <Field label="Shop name"><input className="input" required maxLength={120} value={shop} onChange={(e) => setShop(e.target.value)} /></Field>
-          <Field label="Phone (shown to customers)"><input className="input" inputMode="tel" maxLength={20} value={phone} onChange={(e) => setPhone(e.target.value)} /></Field>
-          <Field label="Email"><input className="input bg-stone-50" value={me.email} disabled /></Field>
-          {prof.error && <ErrorBox message={prof.error} />}
-          <div className="flex items-center gap-3"><button className="btn-primary" disabled={prof.busy}>{prof.busy ? "Saving..." : "Save"}</button>{saved && <span className="text-sm text-emerald-700">Saved</span>}</div>
-        </form>
+          <div className="mt-4 space-y-3 text-sm">
+            <div><div className="label">Shop name</div><div className="font-medium text-maroon-800">{shop}</div></div>
+            <div><div className="label">Phone</div><div className="text-stone-600">{phone || "Not added"}</div></div>
+            <div><div className="label">Email</div><div className="text-stone-600">{me.email}</div></div>
+          </div>
+        </div>
 
         <div className="card">
           <h2 className="mb-3 font-display text-lg font-semibold text-maroon-800">Shop logo</h2>
@@ -75,6 +77,15 @@ export default function SettingsPage() {
           ) : <p className="text-sm text-stone-500">Telegram is not set up on the server yet (the backend needs TELEGRAM_BOT_TOKEN and TELEGRAM_BOT_USERNAME).</p>}
         </div>
       </div>
+      <Modal open={profileOpen} onClose={() => setProfileOpen(false)} title="Edit shop profile">
+        <form onSubmit={saveProfile} className="space-y-3">
+          <Field label="Shop name"><input className="input" required maxLength={120} value={shop} onChange={(e) => setShop(e.target.value)} autoFocus /></Field>
+          <Field label="Phone (shown to customers)"><input className="input" inputMode="tel" pattern="[0-9+\- ]{7,20}" title="7-20 digits, may start with +" maxLength={20} value={phone} onChange={(e) => setPhone(e.target.value)} /></Field>
+          <Field label="Email"><input className="input bg-stone-50" value={me.email} disabled /></Field>
+          {prof.error && <ErrorBox message={prof.error} />}
+          <div className="flex items-center justify-end gap-3"><button type="button" className="btn-ghost" onClick={() => setProfileOpen(false)}>Cancel</button><button className="btn-primary" disabled={prof.busy}>{prof.busy ? "Saving..." : "Save changes"}</button>{saved && <span className="text-sm text-emerald-700">Saved</span>}</div>
+        </form>
+      </Modal>
       <button className="btn-danger mt-6" onClick={logout}>Log out</button>
     </>
   );
