@@ -18,6 +18,29 @@ env:
   APP_NAME: ${{ vars.AZURE_CONTAINER_APP }}
 
 jobs:
+  config:
+    runs-on: ubuntu-latest
+    outputs:
+      enabled: ${{ steps.check.outputs.enabled }}
+    steps:
+      - id: check
+        name: Check Azure deployment configuration
+        env:
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
+          ACR_NAME: ${{ vars.AZURE_ACR_NAME }}
+          APP_NAME: ${{ vars.AZURE_CONTAINER_APP }}
+        run: |
+          if [ -n "$AZURE_CLIENT_ID" ] && [ -n "$AZURE_TENANT_ID" ] && [ -n "$AZURE_SUBSCRIPTION_ID" ] \
+            && [ -n "$RESOURCE_GROUP" ] && [ -n "$ACR_NAME" ] && [ -n "$APP_NAME" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Azure deployment skipped because required secrets or repository variables are not configured."
+          fi
+
   test:
     runs-on: ubuntu-latest
     defaults: { run: { working-directory: backend } }
@@ -29,7 +52,8 @@ jobs:
       - run: python -m pytest -q
 
   deploy:
-    needs: test
+    needs: [config, test]
+    if: needs.config.outputs.enabled == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
