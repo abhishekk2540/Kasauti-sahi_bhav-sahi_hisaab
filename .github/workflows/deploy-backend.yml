@@ -62,8 +62,11 @@ jobs:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-      - name: Build image in Azure Container Registry
-        run: az acr build --registry "$ACR_NAME" --image "kasauti-api:${{ github.sha }}" ./backend
+      - name: Build and push image to Azure Container Registry
+        run: |
+          az acr login --name "$ACR_NAME"
+          docker build --tag "$ACR_NAME.azurecr.io/kasauti-api:${{ github.sha }}" ./backend
+          docker push "$ACR_NAME.azurecr.io/kasauti-api:${{ github.sha }}"
       - name: Roll out new revision
         run: |
           az containerapp update \
