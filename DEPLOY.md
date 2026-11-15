@@ -115,7 +115,9 @@ GitHub repo > Settings > Secrets and variables > Actions:
 - **Secrets:** `AZURE_CLIENT_ID` (=APP_ID), `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`
 - **Variables:** `AZURE_RESOURCE_GROUP` (=kasauti-rg), `AZURE_CONTAINER_APP` (=kasauti-api)
 
-The workflow publishes `ghcr.io/<github-user>/kasauti-api:<commit-sha>`. Because the current
+The workflow publishes `ghcr.io/<github-user>/kasauti-api:<commit-sha>`. The backend listens on
+container port `8000`, and the workflow sets the Container Apps ingress target port to `8000`.
+Because the current
 Azure Container Apps environment is Express and cannot authenticate to a private registry, set the
 GitHub Container Registry package visibility to **Public** after its first successful push:
 `Repository > Packages > kasauti-api > Package settings > Change visibility > Public`.
