@@ -98,7 +98,7 @@ az containerapp update -n $APP -g $RG --set-env-vars CORS_ORIGINS=https://<your-
 3. In the app: Settings > Open Telegram > Start. Customers get their own invite link on the Customers page.
 
 ## 8. CI/CD with GitHub Actions
-**(a) Deploy on every push to `main`** (`.github/workflows/deploy-backend.yml`: tests -> build in ACR -> new revision -> health check).
+**(a) Deploy on every push to `main`** (`.github/workflows/deploy-backend.yml`: tests -> build in GitHub Container Registry -> new revision -> health check).
 Passwordless login via OIDC. Run once:
 ```bash
 SUB=$(az account show --query id -o tsv);  TENANT=$(az account show --query tenantId -o tsv)
@@ -113,7 +113,13 @@ echo $APP_ID $TENANT $SUB
 ```
 GitHub repo > Settings > Secrets and variables > Actions:
 - **Secrets:** `AZURE_CLIENT_ID` (=APP_ID), `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`
-- **Variables:** `AZURE_RESOURCE_GROUP` (=kasauti-rg), `AZURE_ACR_NAME` (=your ACR name), `AZURE_CONTAINER_APP` (=kasauti-api)
+- **Variables:** `AZURE_RESOURCE_GROUP` (=kasauti-rg), `AZURE_CONTAINER_APP` (=kasauti-api)
+
+The workflow publishes `ghcr.io/<github-user>/kasauti-api:<commit-sha>`. Because the current
+Azure Container Apps environment is Express and cannot authenticate to a private registry, set the
+GitHub Container Registry package visibility to **Public** after its first successful push:
+`Repository > Packages > kasauti-api > Package settings > Change visibility > Public`.
+Do not put secrets in the image; runtime secrets must remain in Azure configuration.
 
 **(b) Daily rates / alerts / reminders** (`daily-job.yml`, 09:15 IST). It talks to Neon directly, so add **Secrets:**
 `DATABASE_URL`, `JWT_SECRET`, `GROQ_API_KEY`, `TELEGRAM_BOT_TOKEN`, `SENTRY_DSN` (and optional variables
