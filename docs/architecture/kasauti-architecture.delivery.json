@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "9852e516-354f-4c18-a10c-82cac01a4f3e",
+  "status": "current",
+  "command": "deliver",
+  "type": "architecture",
+  "input": "C:\\Users\\Soul hacker abhishek\\OneDrive\\Documents\\Desktop\\kasauti\\docs\\architecture\\kasauti-architecture.json",
+  "output": "C:\\Users\\Soul hacker abhishek\\OneDrive\\Documents\\Desktop\\kasauti\\docs\\architecture\\kasauti-architecture.html",
+  "specification": {
+    "sha256": "344b0e1a783bbf3e710e3f75bf3569478c56b65fb7f0cdbc26e24e9d25a6f348",
+    "bytes": 11338
+  },
+  "artifact": {
+    "sha256": "0de1394ab181680b5530fcda168cfeacc7daba665d046482ba6f7a67ba2fb43d",
+    "bytes": 866019
+  }
+}

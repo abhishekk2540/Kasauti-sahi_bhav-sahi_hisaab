@@ -1,6 +1,6 @@
 import io
 
-from fastapi import APIRouter, Depends, File, HTTPException, Response, UploadFile
+from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, Response, UploadFile
 from PIL import Image
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -8,8 +8,13 @@ from sqlalchemy.orm import Session
 from ..db import get_db
 from ..deps import current_user
 from ..models import User
-from ..schemas import LoginIn, ProfileUpdate, SignupIn, TokenOut, UserOut
-from ..security import create_token, hash_password, verify_password
+from ..schemas import (
+    ForgotPasswordIn, LoginIn, MessageOut, ProfileUpdate, ResetPasswordIn, SignupIn, TokenOut, UserOut,
+)
+from ..security import (
+    create_reset_token, create_token, decode_reset_token, hash_password, reset_token_matches, verify_password,
+)
+from ..services.mailer import send_password_reset
 from ..services.notify import deep_link
 
 router = APIRouter(tags=["auth"])
@@ -38,7 +43,32 @@ def login(body: LoginIn, db: Session = Depends(get_db)):
     if not user or not user.password_hash or not verify_password(body.password, user.password_hash):
         raise HTTPException(401, "Invalid email or password")
     return TokenOut(access_token=create_token(user.id))
+FORGOT_MESSAGE = "If an account exists for that email, a password reset link has been sent."
 
+
+@router.post("/auth/forgot-password", response_model=MessageOut, status_code=202)
+def forgot_password(body: ForgotPasswordIn, background: BackgroundTasks, db: Session = Depends(get_db)):
+    """Always answers the same way so it can't be used to discover which emails are registered."""
+    user = db.scalar(select(User).where(User.email == body.email.lower()))
+    if user:
+        token = create_reset_token(user.id, user.password_hash)
+        background.add_task(send_password_reset, user.email, user.telegram_chat_id, token)
+    return MessageOut(message=FORGOT_MESSAGE)
+
+
+@router.post("/auth/reset-password", response_model=MessageOut)
+def reset_password(body: ResetPasswordIn, db: Session = Depends(get_db)):
+    invalid = HTTPException(400, "This reset link is invalid or has expired. Please request a new one.")
+    decoded = decode_reset_token(body.token)
+    if not decoded:
+        raise invalid
+    user_id, fingerprint = decoded
+    user = db.get(User, user_id)
+    if not user or not reset_token_matches(fingerprint, user.password_hash):
+        raise invalid
+    user.password_hash = hash_password(body.password)
+    db.commit()
+    return MessageOut(message="Password updated. You can now log in.")
 
 @router.get("/me", response_model=UserOut)
 def me(user: User = Depends(current_user)):

@@ -6,9 +6,9 @@ import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { useAction } from "@/lib/hooks";
+import { PASSWORD_HINT, PASSWORD_RULE_MESSAGE, passwordPattern } from "@/lib/password";
+import { PasswordInput } from "./PasswordInput";
 import { ErrorBox, Field } from "./ui";
-
-const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{7,128}$/;
 
 export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   const router = useRouter();
@@ -27,7 +27,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
     await run(async () => {
       if (mode === "signup") {
         if (!passwordPattern.test(form.password)) {
-          throw new Error("Password needs 7+ characters, uppercase, lowercase, a number, and a special character.");
+          throw new Error(PASSWORD_RULE_MESSAGE);
         }
         if (form.password !== form.confirmPassword) throw new Error("Passwords do not match.");
       }
@@ -57,12 +57,17 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
             </>
           )}
           <Field label="Email"><input className="input" type="email" required autoComplete="email" value={form.email} onChange={set("email")} /></Field>
-          <Field label="Password" hint={mode === "signup" ? "7+ chars, upper/lowercase, number and special character" : undefined}>
-            <input className="input" type="password" required minLength={mode === "signup" ? 7 : 1} autoComplete={mode === "login" ? "current-password" : "new-password"} value={form.password} onChange={set("password")} />
+          <Field label="Password" hint={mode === "signup" ? PASSWORD_HINT : undefined}>
+            <PasswordInput required minLength={mode === "signup" ? 7 : 1} autoComplete={mode === "login" ? "current-password" : "new-password"} value={form.password} onChange={set("password")} />
           </Field>
+          {mode === "login" && (
+            <div className="text-right">
+              <Link className="text-sm font-medium text-maroon-600 underline" href="/forgot-password">Forgot password?</Link>
+            </div>
+          )}
           {mode === "signup" && (
             <Field label="Confirm password">
-              <input className="input" type="password" required minLength={7} autoComplete="new-password" value={form.confirmPassword} onChange={set("confirmPassword")} />
+              <PasswordInput required minLength={7} autoComplete="new-password" value={form.confirmPassword} onChange={set("confirmPassword")} />
             </Field>
           )}
           {error && <ErrorBox message={error} />}

@@ -1,0 +1,575 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Kasauti System Architecture",
+    "locale": "en",
+    "quality_profile": "showcase",
+    "output": "docs/architecture/kasauti-architecture.html",
+    "repository": {
+      "url": "https://github.com/abhishekk2540/Kasauti-sahi_bhav-sahi_hisaab.git",
+      "provider": "github",
+      "link_mode": "web",
+      "revision": "5d8725f4981547155263d85be3537f3abd0d2b4a"
+    }
+  },
+  "components": [
+    {
+      "id": "jeweller",
+      "type": "external",
+      "label": "Jeweller",
+      "sublabel": "Shop owner in browser",
+      "icon": "person",
+      "pos": [
+        184,
+        40
+      ],
+      "size": [
+        110,
+        75
+      ],
+      "sources": [
+        {
+          "path": "frontend/components/Shell.tsx",
+          "line": 9,
+          "end_line": 18
+        }
+      ]
+    },
+    {
+      "id": "web-ui",
+      "type": "frontend",
+      "label": "Next.js frontend",
+      "sublabel": "Shop dashboard",
+      "icon": "frontend",
+      "pos": [
+        134,
+        235
+      ],
+      "size": [
+        130,
+        90
+      ],
+      "sources": [
+        {
+          "path": "frontend/package.json",
+          "line": 5,
+          "end_line": 19
+        },
+        {
+          "path": "frontend/components/Shell.tsx",
+          "line": 9,
+          "end_line": 18
+        },
+        {
+          "path": "frontend/app/(app)/rates/page.tsx",
+          "line": 16,
+          "end_line": 31
+        }
+      ]
+    },
+    {
+      "id": "api-client",
+      "type": "frontend",
+      "label": "Browser API client",
+      "sublabel": "JSON • JWT • chat SSE",
+      "icon": "frontend",
+      "pos": [
+        288,
+        235
+      ],
+      "size": [
+        150,
+        90
+      ],
+      "sources": [
+        {
+          "path": "frontend/lib/api.ts",
+          "line": 3,
+          "end_line": 63
+        },
+        {
+          "path": "frontend/lib/api.ts",
+          "line": 78,
+          "end_line": 120
+        }
+      ]
+    },
+    {
+      "id": "fastapi",
+      "type": "backend",
+      "label": "FastAPI backend",
+      "sublabel": "CORS • feature + Telegram routes",
+      "icon": "backend",
+      "pos": [
+        438,
+        333
+      ],
+      "size": [
+        180,
+        100
+      ],
+      "sources": [
+        {
+          "path": "backend/app/main.py",
+          "line": 9,
+          "end_line": 27
+        },
+        {
+          "path": "backend/app/db.py",
+          "line": 8,
+          "end_line": 12
+        },
+        {
+          "path": "backend/app/routers/telegram.py",
+          "line": 58,
+          "end_line": 70
+        }
+      ]
+    },
+    {
+      "id": "authentication",
+      "type": "security",
+      "label": "Authentication",
+      "sublabel": "scrypt • HS256 bearer JWT",
+      "icon": "security",
+      "pos": [
+        438,
+        40
+      ],
+      "size": [
+        180,
+        90
+      ],
+      "sources": [
+        {
+          "path": "backend/app/routers/auth.py",
+          "line": 24,
+          "end_line": 45
+        },
+        {
+          "path": "backend/app/security.py",
+          "line": 11,
+          "end_line": 36
+        },
+        {
+          "path": "backend/app/deps.py",
+          "line": 9,
+          "end_line": 20
+        }
+      ]
+    },
+    {
+      "id": "rates",
+      "type": "backend",
+      "label": "Gold + silver rates",
+      "sublabel": "INR/g • history • margins",
+      "icon": "backend",
+      "pos": [
+        642,
+        115
+      ],
+      "size": [
+        140,
+        90
+      ],
+      "sources": [
+        {
+          "path": "backend/app/services/providers.py",
+          "line": 24,
+          "end_line": 46
+        },
+        {
+          "path": "backend/app/services/rates.py",
+          "line": 17,
+          "end_line": 38
+        },
+        {
+          "path": "backend/app/routers/rates.py",
+          "line": 33,
+          "end_line": 52
+        }
+      ]
+    },
+    {
+      "id": "customer-alerts",
+      "type": "backend",
+      "label": "Customer price alerts",
+      "sublabel": "Daily rules • cooldown • opt-out",
+      "icon": "backend",
+      "pos": [
+        642,
+        300
+      ],
+      "size": [
+        140,
+        95
+      ],
+      "sources": [
+        {
+          "path": "backend/app/services/alerts.py",
+          "line": 52,
+          "end_line": 77
+        },
+        {
+          "path": "backend/app/models.py",
+          "line": 77,
+          "end_line": 103
+        },
+        {
+          "path": "backend/app/routers/alerts.py",
+          "line": 55,
+          "end_line": 71
+        }
+      ]
+    },
+    {
+      "id": "savings-schemes",
+      "type": "backend",
+      "label": "11-month savings",
+      "sublabel": "Default plan • monthly ledger",
+      "icon": "backend",
+      "pos": [
+        642,
+        490
+      ],
+      "size": [
+        140,
+        100
+      ],
+      "sources": [
+        {
+          "path": "backend/app/models.py",
+          "line": 106,
+          "end_line": 157
+        },
+        {
+          "path": "backend/app/services/schemes.py",
+          "line": 18,
+          "end_line": 36
+        },
+        {
+          "path": "backend/app/routers/schemes.py",
+          "line": 99,
+          "end_line": 115
+        }
+      ]
+    },
+    {
+      "id": "ai-assistant",
+      "type": "backend",
+      "label": "AI Assistant",
+      "sublabel": "Tools • owner confirms writes",
+      "icon": "backend",
+      "pos": [
+        642,
+        680
+      ],
+      "size": [
+        140,
+        95
+      ],
+      "sources": [
+        {
+          "path": "backend/app/routers/agent.py",
+          "line": 22,
+          "end_line": 35
+        },
+        {
+          "path": "backend/app/services/agent/runner.py",
+          "line": 18,
+          "end_line": 30
+        },
+        {
+          "path": "backend/app/services/agent/tools.py",
+          "line": 118,
+          "end_line": 148
+        }
+      ]
+    },
+    {
+      "id": "postgres",
+      "type": "database",
+      "label": "PostgreSQL",
+      "sublabel": "Compose • SQLite dev",
+      "icon": "database",
+      "pos": [
+        40,
+        40
+      ],
+      "size": [
+        120,
+        90
+      ],
+      "sources": [
+        {
+          "path": "docker-compose.yml",
+          "line": 1,
+          "end_line": 13
+        },
+        {
+          "path": "backend/app/config.py",
+          "line": 20,
+          "end_line": 26
+        },
+        {
+          "path": "backend/app/db.py",
+          "line": 8,
+          "end_line": 12
+        }
+      ]
+    },
+    {
+      "id": "market-data",
+      "type": "external",
+      "label": "Market data APIs",
+      "sublabel": "GoldAPI • USD/INR feed",
+      "icon": "external",
+      "pos": [
+        806,
+        145
+      ],
+      "size": [
+        120,
+        90
+      ],
+      "sources": [
+        {
+          "path": "backend/app/services/providers.py",
+          "line": 24,
+          "end_line": 46
+        }
+      ]
+    },
+    {
+      "id": "telegram",
+      "type": "external",
+      "label": "Telegram Bot API",
+      "sublabel": "Alerts • reminders",
+      "icon": "external",
+      "pos": [
+        806,
+        350
+      ],
+      "size": [
+        120,
+        90
+      ],
+      "sources": [
+        {
+          "path": "backend/app/services/notify.py",
+          "line": 18,
+          "end_line": 30
+        },
+        {
+          "path": "backend/app/routers/telegram.py",
+          "line": 58,
+          "end_line": 70
+        }
+      ]
+    },
+    {
+      "id": "llm-providers",
+      "type": "external",
+      "label": "LLM providers",
+      "sublabel": "Groq / Anthropic",
+      "icon": "external",
+      "pos": [
+        806,
+        680
+      ],
+      "size": [
+        120,
+        95
+      ],
+      "sources": [
+        {
+          "path": "backend/app/services/llm.py",
+          "line": 11,
+          "end_line": 36
+        },
+        {
+          "path": "backend/app/services/agent/runner.py",
+          "line": 37,
+          "end_line": 57
+        }
+      ]
+    },
+    {
+      "id": "daily-job",
+      "type": "cloud",
+      "label": "GitHub Actions job",
+      "sublabel": "Daily rates / alerts / drafts",
+      "icon": "cloud",
+      "pos": [
+        806,
+        245
+      ],
+      "size": [
+        120,
+        90
+      ],
+      "sources": [
+        {
+          "path": "backend/app/jobs.py",
+          "line": 15,
+          "end_line": 21
+        },
+        {
+          "path": ".github/workflows/daily-job.yml",
+          "line": 1,
+          "end_line": 15
+        }
+      ]
+    },
+    {
+      "id": "sentry",
+      "type": "external",
+      "label": "Sentry",
+      "sublabel": "Optional • SENTRY_DSN",
+      "icon": "external",
+      "pos": [
+        806,
+        830
+      ],
+      "size": [
+        120,
+        90
+      ],
+      "sources": [
+        {
+          "path": "backend/app/observability.py",
+          "line": 9,
+          "end_line": 23
+        }
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "owner-to-web",
+      "from": "jeweller",
+      "to": "web-ui"
+    },
+    {
+      "id": "web-to-client",
+      "from": "web-ui",
+      "to": "api-client"
+    },
+    {
+      "id": "client-to-api",
+      "from": "api-client",
+      "to": "fastapi",
+      "label": "API",
+      "variant": "emphasis"
+    },
+    {
+      "id": "api-to-auth",
+      "from": "fastapi",
+      "to": "authentication",
+      "label": "JWT",
+      "variant": "security"
+    },
+    {
+      "id": "api-to-rates",
+      "from": "fastapi",
+      "to": "rates",
+      "label": "rate"
+    },
+    {
+      "id": "api-to-alerts",
+      "from": "fastapi",
+      "to": "customer-alerts",
+      "label": "alert"
+    },
+    {
+      "id": "api-to-schemes",
+      "from": "fastapi",
+      "to": "savings-schemes",
+      "label": "plan"
+    },
+    {
+      "id": "api-to-assistant",
+      "from": "fastapi",
+      "to": "ai-assistant",
+      "label": "agent"
+    },
+    {
+      "id": "api-to-postgres",
+      "from": "fastapi",
+      "to": "postgres",
+      "label": "SQLAlchemy",
+      "fromSide": "left",
+      "toSide": "left",
+      "via": [
+        [
+          32,
+          383
+        ],
+        [
+          32,
+          85
+        ]
+      ]
+    },
+    {
+      "id": "market-to-rates",
+      "from": "market-data",
+      "to": "rates"
+    },
+    {
+      "id": "alerts-to-telegram",
+      "from": "customer-alerts",
+      "to": "telegram"
+    },
+    {
+      "id": "schemes-to-telegram",
+      "from": "savings-schemes",
+      "to": "telegram"
+    },
+    {
+      "id": "assistant-to-llm",
+      "from": "ai-assistant",
+      "to": "llm-providers"
+    },
+    {
+      "id": "llm-to-assistant",
+      "from": "llm-providers",
+      "to": "ai-assistant"
+    },
+    {
+      "id": "schemes-to-llm",
+      "from": "savings-schemes",
+      "to": "llm-providers",
+      "label": "draft"
+    },
+    {
+      "id": "llm-to-schemes",
+      "from": "llm-providers",
+      "to": "savings-schemes",
+      "label": "text"
+    },
+    {
+      "id": "api-to-sentry",
+      "from": "fastapi",
+      "to": "sentry",
+      "label": "optional monitoring",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "via": [
+        [
+          528,
+          453
+        ],
+        [
+          528,
+          810
+        ],
+        [
+          866,
+          810
+        ]
+      ]
+    }
+  ]
+}
